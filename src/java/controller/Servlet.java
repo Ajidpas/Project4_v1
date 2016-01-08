@@ -11,8 +11,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import model.dao.DAODirector;
+import model.dao.ENUMEntity;
 import model.entity.Meal;
-import tester.TestRunner;
 
 /**
  *
@@ -24,12 +25,13 @@ public class Servlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        Meal meal = TestRunner.getMeal();
+        DAODirector director = new DAODirector(ENUMEntity.MEAL);
+        int id = Integer.parseInt(request.getParameter("mealId"));
+        Meal meal = (Meal) director.getEntityById(id);
         String name;
         String price;
-        int id;
         String description;
-        if (meal == null) {
+        if (meal == null || id < 1) {
             name = "No information!";
             price = "No information!";
             id = 0;
