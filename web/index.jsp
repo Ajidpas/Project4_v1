@@ -14,13 +14,6 @@
     </head>
     <body>
         <h1>Welcome to our restaurant Tulip (if statement was added)</h1>
-        <a href="login.jsp">Login</a>
-        <a href="${pageContext.request.contextPath}/servlet?logout=1">Logout</a>
-        <div>
-            <form action="servlet">
-                Find meal by id : <input type="text" name="mealId">
-                <input type="submit" name="findMeal" value="Search">
-            </form>
-        </div>
+        <h2><a href="${pageContext.request.contextPath}/servlet?menu=1">Main menu</a> | <a href="login.jsp">Login</a></h2>
     </body>
 </html>

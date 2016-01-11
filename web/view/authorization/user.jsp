@@ -15,6 +15,6 @@
         <title>User page</title>
     </head>
     <body>
-        <h4>${userName} <a href="${pageContext.request.contextPath}/servlet?logout=1">Logout</a> <a href="ProfileServlet">Profile</a></h4> 
+        <h4>${userName} | <a href="${pageContext.request.contextPath}/servlet?logout=1">Logout</a> <a href="ProfileServlet">Profile</a></h4> 
     </body>
 </html>

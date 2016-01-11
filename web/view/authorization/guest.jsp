@@ -12,6 +12,6 @@
         <title>Log in please</title>
     </head>
     <body>
-        <h4>Guest <a href="login.jsp">Login</a></h4>
+        <h4>Guest | <a href="login.jsp">Login</a></h4>
     </body>
 </html>
