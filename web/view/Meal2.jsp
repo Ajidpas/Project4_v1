@@ -1,6 +1,6 @@
 <%-- 
-    Document   : Meal
-    Created on : 07.01.2016, 1:32:55
+    Document   : Meal2
+    Created on : 10.01.2016, 23:09:34
     Author     : Sasha
 --%>
 
@@ -9,7 +9,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Meal by id</title>
+        <title>JSP Page</title>
     </head>
     <body>
         <h1>Here is your meal by id = ${id}</h1>
