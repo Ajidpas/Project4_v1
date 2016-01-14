@@ -1,6 +1,6 @@
 <%-- 
-    Document   : index
-    Created on : 08.01.2016, 4:14:17
+    Document   : language
+    Created on : 12.01.2016, 16:13:31
     Author     : Sasha
 --%>
 
@@ -12,22 +12,19 @@
 <fmt:setBundle basename="controller.properties.text" />
 
 <!DOCTYPE html>
-<html>
+<html lang="${language}">
     <head>
-        <title>Tulip</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Language</title>
     </head>
     <body>
-        <form>
-            <select id="language" name="language" onchange="submit()">
+        <form action="servlet" method="get">
+            <select name="language" onchange="submit()"  >
                 <option value="en" ${language == 'en' ? 'selected' : ''}>English</option> 
                 <option value="ru" ${language == 'ru' ? 'selected' : ''}>Русский</option>
                 <option value="ua" ${language == 'ua' ? 'selected' : ''}>Українська</option>
+                <input type="hidden" name="select" value="true">
             </select>
         </form>
-        <h4><fmt:message key="index.text.guest" /> | <a href="login.jsp"><fmt:message key="index.link.login" /></a></h4>
-        <h1><fmt:message key="index.text.welcome" /></h1>
-        <h2><a href="${pageContext.request.contextPath}/servlet?menu=1"><fmt:message key="index.link.mainmenu" /></a></h2>
     </body>
 </html>

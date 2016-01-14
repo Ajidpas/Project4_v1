@@ -7,7 +7,9 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,70 +31,88 @@ public class Servlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // set authorization block
-        if (request.getParameter("logout") != null) {
-            logout(request, response);
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
+        if (request.getParameter("select") != null) {
+            dispatchers.addAll(setLanguage(request, response));
         } else {
-            setAuthorizationBlock(request, response);
+            // set language combo box and authorization block
+            dispatchers.addAll(setHead(request, response));
+            
+            // get all meal
+            if (request.getParameter("menu") != null) {
+                dispatchers.addAll(getAllMeal(request, response));
+            }
+            // find meal
+//            if (request.getParameter("findMeal") != null) {
+//                dispatchers.addAll(findMeal(request, response));
+//            }
         }
-        // get all meal
-        if (request.getParameter("menu") != null) {
-            getAllMeal(request, response);
-        }
-        // find meal
-        if (request.getParameter("findMeal") != null) {
-            findMeal(request, response);
-        }
+        
+        executeAll(dispatchers, request, response);
     }
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
+        
+        // set language combo box and authorization block
+        dispatchers.addAll(setHead(request, response));
+        
         if (request.getParameter("login") != null) {
-            login(request, response);
+            dispatchers.addAll(login(request, response));
         }
-        if (request.getParameter("add") != null) {
-            addMeal(request, response);
-        }
+//        if (request.getParameter("add") != null) {
+//            addMeal(request, response);
+//        }
+        
+        executeAll(dispatchers, request, response);
     }
     
-    private void login(HttpServletRequest request, HttpServletResponse response) 
+    private List<RequestDispatcher> login(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
         response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+        
         String name = request.getParameter("name");
         String password = request.getParameter("password");    
         if (password.equals("admin123")) {
             HttpSession session = request.getSession();
-            session.setAttribute("name", name);
-            request.setAttribute("userName", name);
-            request.getRequestDispatcher("/view/authorization/user.jsp").include(request, response);
-            request.getRequestDispatcher("/index.jsp").include(request, response);
+            session.setAttribute("userName", name);
+            dispatchers.add(request.getRequestDispatcher("/view/home.jsp"));
         } else {
             try (PrintWriter out = response.getWriter()) {
-                request.getRequestDispatcher("/login.jsp").include(request, response);
+                dispatchers.add(request.getRequestDispatcher("/login.jsp"));
                 out.print("Sorry, user name or password error! Try again."); // input this expression to the jsp file
             }
         }
+        return dispatchers;
     }
     
     private void logout(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
         session.invalidate();
-        request.getRequestDispatcher("/view/authorization/guest.jsp").include(request, response);
-        request.getRequestDispatcher("/index.jsp").include(request, response);
+        request.getRequestDispatcher("/view/language.jsp").include(request, response);
+        request.getRequestDispatcher("/view/guest/authorization.jsp").include(request, response);
+        request.getRequestDispatcher("/view/home.jsp").include(request, response);
     }
     
-    private void getAllMeal(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private List<RequestDispatcher> getAllMeal(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
         DAODirector director = new DAODirector(ENUMEntity.MEAL);
         List<DBEntity> meals = director.getAllEntities();
-        request.setAttribute("meals", meals);
-        request.getRequestDispatcher("/view/MainMenu.jsp").include(request, response);
+        request.getSession().setAttribute("meals", meals);
+        dispatchers.add(request.getRequestDispatcher("/view/user/MainMenu.jsp"));
+        return dispatchers;
     }
     
-    private void findMeal(HttpServletRequest request, HttpServletResponse response) 
+    private List<RequestDispatcher> findMeal(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException{
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
         DAODirector director = new DAODirector(ENUMEntity.MEAL);
         int id = Integer.parseInt(request.getParameter("mealId"));
         Meal meal = (Meal) director.getEntityById(id);
@@ -114,28 +134,72 @@ public class Servlet extends HttpServlet {
         request.setAttribute("name", name);
         request.setAttribute("price", price);
         request.setAttribute("description", description);
-        request.getRequestDispatcher("/view/Meal.jsp").include(request, response);
+        dispatchers.add(request.getRequestDispatcher("/view/Meal.jsp"));
+        return dispatchers;
     }
     
-    private void addMeal(HttpServletRequest request, HttpServletResponse response) 
+    private RequestDispatcher addMeal(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        RequestDispatcher dispatcher;
         int id = Integer.parseInt(request.getParameter("id"));
         //TODO: adding meal for current user
         try (PrintWriter out = response.getWriter()) {
-            request.getRequestDispatcher("/view/Test.jsp").include(request, response);
-                out.print("Meal with id = " + id + " was added!"); // TODO realisation
-            }
+            dispatcher = request.getRequestDispatcher("/view/Test.jsp");
+            dispatcher.include(request, response);
+            out.print("Meal with id = " + id + " was added!"); // TODO realisation
+        }
+        return dispatcher;
     }
     
-    private void setAuthorizationBlock(HttpServletRequest request, HttpServletResponse response) 
+    private List<RequestDispatcher> setLanguage(HttpServletRequest request, 
+            HttpServletResponse response) throws ServletException, IOException {
+        return (List<RequestDispatcher>) request.getSession().getAttribute("dispatchers");
+    }
+    
+    private List<RequestDispatcher> setAuthorizationBlock(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
         HttpSession session = request.getSession();
-        String name = (String) session.getAttribute("name");
+        String name = (String) session.getAttribute("userName");
         if (name != null) {
-            request.setAttribute("userName", name);
-            request.getRequestDispatcher("/view/authorization/user.jsp").include(request, response);
+            dispatchers.add(request.getRequestDispatcher("/view/user/authorization.jsp"));
         } else {
-            request.getRequestDispatcher("/view/authorization/guest.jsp").include(request, response);
+            dispatchers.add(request.getRequestDispatcher("/view/guest/authorization.jsp"));
         }
+        return dispatchers;
+    }
+    
+    private void executeAll(List<RequestDispatcher> dispatchers, 
+            HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+        
+        /* 
+         * check size, if (dispatchers.size() <= 2) - becouse after setHead() 
+         * method there will be 2 dispatchers: language and authorization block
+         */
+        if (dispatchers.size() <= 2) { 
+            dispatchers.add(request.getRequestDispatcher("/view/home.jsp"));
+        }
+        
+        // save last query and execute
+        request.getSession().setAttribute("dispatchers", dispatchers);
+        for (RequestDispatcher dispatcher : dispatchers) {
+            dispatcher.include(request, response);
+        }
+    }
+    
+    private List<RequestDispatcher> setHead(HttpServletRequest request, 
+            HttpServletResponse response) throws ServletException, IOException {
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
+        dispatchers.add(request.getRequestDispatcher("/view/language.jsp"));
+        // set authorization block
+        if (request.getParameter("logout") != null) {
+            logout(request, response);
+        } else {
+            dispatchers.addAll(setAuthorizationBlock(request, response));
+        }
+        return dispatchers;
     }
 }
