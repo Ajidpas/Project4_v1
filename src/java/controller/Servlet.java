@@ -46,8 +46,10 @@ public class Servlet extends HttpServlet {
 //            if (request.getParameter("findMeal") != null) {
 //                dispatchers.addAll(findMeal(request, response));
 //            }
+            if (dispatchers.size() <= 2) {
+                dispatchers.add(request.getRequestDispatcher("/view/home.jsp"));
+            }
         }
-        
         executeAll(dispatchers, request, response);
     }
     
@@ -57,10 +59,13 @@ public class Servlet extends HttpServlet {
         List<RequestDispatcher> dispatchers = new ArrayList<>();
         
         // set language combo box and authorization block
-        dispatchers.addAll(setHead(request, response));
         
         if (request.getParameter("login") != null) {
             dispatchers.addAll(login(request, response));
+        } else if (request.getParameter("authorization") != null) {
+            dispatchers.addAll(loginRequest(request, response));
+        } else {
+            dispatchers.addAll(setHead(request, response));
         }
 //        if (request.getParameter("add") != null) {
 //            addMeal(request, response);
@@ -80,13 +85,21 @@ public class Servlet extends HttpServlet {
         if (password.equals("admin123")) {
             HttpSession session = request.getSession();
             session.setAttribute("userName", name);
-            dispatchers.add(request.getRequestDispatcher("/view/home.jsp"));
+            dispatchers.addAll((List<RequestDispatcher>) session.getAttribute("dispatchersbeforelogin"));
         } else {
             try (PrintWriter out = response.getWriter()) {
                 dispatchers.add(request.getRequestDispatcher("/login.jsp"));
                 out.print("Sorry, user name or password error! Try again."); // input this expression to the jsp file
             }
         }
+        return dispatchers;
+    }
+    
+    private List<RequestDispatcher> loginRequest(HttpServletRequest request, HttpServletResponse response) {
+        List<RequestDispatcher> dispatchers = new ArrayList<>();
+        HttpSession session = request.getSession();
+        session.setAttribute("dispatchersbeforelogin", session.getAttribute("dispatchers"));
+        dispatchers.add(request.getRequestDispatcher("/login.jsp"));
         return dispatchers;
     }
     
@@ -175,13 +188,13 @@ public class Servlet extends HttpServlet {
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
         
-        /* 
-         * check size, if (dispatchers.size() <= 2) - becouse after setHead() 
-         * method there will be 2 dispatchers: language and authorization block
-         */
-        if (dispatchers.size() <= 2) { 
-            dispatchers.add(request.getRequestDispatcher("/view/home.jsp"));
-        }
+//        /* 
+//         * check size, if (dispatchers.size() <= 2) - becouse after setHead() 
+//         * method there will be 2 dispatchers: language and authorization block
+//         */
+//        if (dispatchers.size() <= 2) { 
+//            dispatchers.add(request.getRequestDispatcher("/view/home.jsp"));
+//        }
         
         // save last query and execute
         request.getSession().setAttribute("dispatchers", dispatchers);

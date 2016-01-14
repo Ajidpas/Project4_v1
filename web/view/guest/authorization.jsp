@@ -12,6 +12,8 @@
         <title>Log in please</title>
     </head>
     <body>
-        <h4>Guest | <a href="login.jsp">Login</a></h4>
+        <form action="servlet" method="post">
+            <h4>Guest | <input type="submit" name="authorization" value="Login"></h4>
+        </form>
     </body>
 </html>

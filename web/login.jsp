@@ -18,11 +18,12 @@
         <title>Login</title>
     </head>
     <body>
-        <form name="language" method="get">
+        <form action="servlet" method="get">
             <select name="language" onchange="submit()"  >
                 <option value="en" ${language == 'en' ? 'selected' : ''}>English</option> 
                 <option value="ru" ${language == 'ru' ? 'selected' : ''}>Русский</option>
                 <option value="ua" ${language == 'ua' ? 'selected' : ''}>Українська</option>
+                <input type="hidden" name="select" value="true">
             </select>
         </form>
         <form action="servlet" method="POST">
